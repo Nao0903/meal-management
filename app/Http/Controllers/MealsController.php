@@ -20,7 +20,9 @@ class MealsController extends Controller
             $meals = Meal::all();
         */
         $data = [];
+        
         if(\Auth::check()){
+            
             //認証済みユーザーを取得
             $user = \Auth::user();
             
@@ -33,6 +35,7 @@ class MealsController extends Controller
             $data = [
                 'user' => $user,
                 'meals' => $meals,
+                
             ];
         }
         
@@ -52,13 +55,15 @@ class MealsController extends Controller
         // 認証済みの場合
         if (\Auth::check()) {
         
-        //Mealモデルをインスタンス化し、値を $meal に代入
-        $meals = new Meal;
-        
-        //'meals'はビューファイル側で呼び出す変数名
-        //$mealsはコントローラ内で生成した変数
-        return view ('meals.create', ['meals' => $meals, ]);
+            //Mealモデルをインスタンス化し、値を $meal に代入
+            $meals = new Meal;
+            
+            //'meals'はビューファイル側で呼び出す変数名
+            //$mealsはコントローラ内で生成した変数
+            return view ('meals.create', ['meals' => $meals, ]);
+            
         }
+        
         //トップぺージへリダイレクトされる
         return redirect("/");
     }
@@ -104,6 +109,7 @@ class MealsController extends Controller
             'kind'=> $request->kind,
             'content'=> $request->content,
             'calorie'=> $request->calorie,
+            
         ]);
         
         //トップページへリダイレクト
@@ -139,12 +145,17 @@ class MealsController extends Controller
     {
 
         $meal =  \App\Meal::findOrFail($id);
-        if (\Auth::id() === $meal->user_id) {
+        
+        if (\Auth::id() === $meal->user_id) 
+        {
+            
             //詳細のレコードは1件である為、ここでは単数形($meal)としている
             $meal = Meal::findOrFail($id);
             
             return view('meals.edit', ['meal' => $meal,]);
+            
         }
+        
         //トップぺージへリダイレクトされる
         return redirect("/");
     }
@@ -155,6 +166,7 @@ class MealsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+     // putまたはpatchでmeals/（任意のid）にアクセスされた場合の「更新処理」
     public function update(Request $request, $id)
     {
         //バリデーション
@@ -170,18 +182,24 @@ class MealsController extends Controller
         //idの値でレコードを検索して取得
         $meal = Meal::findOrFail($id);
         
-        //Mealモデルで検索したレコード($meal)へ edit.blade.phpで受け取った値をカラムへ入れる
-        $meal->date = $request->date;
-        //$meal->user_id = $request->user_id;
-        $meal->kind = $request->kind;
-        $meal->content = $request->content;
-        $meal->calorie = $request->calorie;
+        // 認証済みユーザID が レコードのuser_id と一致する場合は、更新
+        if (\Auth::id() === $meal->user_id) {
         
-        //カラムへ保存
-        $meal ->save();
+            //Mealモデルで検索したレコード($meal)へ edit.blade.phpで受け取った値をカラムへ入れる
+            $meal->date = $request->date;
+            //$meal->user_id = $request->user_id;
+            $meal->kind = $request->kind;
+            $meal->content = $request->content;
+            $meal->calorie = $request->calorie;
+            
+            //カラムへ保存
+            $meal ->save();
+            
+        }
         
         //トップページへリダイレクト
         return redirect('/');
+        
     }
 
     /**
@@ -195,7 +213,7 @@ class MealsController extends Controller
         //idの値でレコードを検索して取得
         $meal = Meal::findOrFail($id);
         
-         // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を削除
+         // 認証済みユーザID が レコードのuser_id と一致する場合は、削除
         if (\Auth::id() === $meal->user_id) {
         
             //レコード削除
@@ -205,5 +223,7 @@ class MealsController extends Controller
         
         //トップページへリダイレクトさせる
         return redirect('/');
+        
     }
+    
 }

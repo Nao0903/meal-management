@@ -43,6 +43,8 @@
                         {!! Form::close() !!}
                     </td>
                     
+                
+                    
                     
                     {{--使用不可:  show.blade.phpに遷移してしまう GETでルーティングすればOK
                             <td>{!! link_to_route('meals.destroy', '削除', ['meal' => $meal->id],['class="btn btn-danger" type="button"']) !!}</td>

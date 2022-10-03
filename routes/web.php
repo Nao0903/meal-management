@@ -19,7 +19,7 @@ Route::get('/', function () {
 //以下はログイン機能を追加したことにより、TOPページをWelcomeでアクセスするようにするため。コメントアウトにしている
 Route::get('/', 'MealsController@index');
 
-Route::resource('meals', 'MealsController');
+//Route::resource('meals', 'MealsController');
 
 
 // ユーザ登録
@@ -39,3 +39,5 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::resource('tasks', 'TasksController', ['only' => ['store', 'destroy']]);
     
 });
+
+
