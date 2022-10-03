@@ -19,13 +19,26 @@ class MealsController extends Controller
             Mealモデルをインスタンス化し(恐らくlaravel内部でnewしている)、DBの値を全て取得
             $meals = Meal::all();
         */
+        $data = [];
+        if(\Auth::check()){
+            //認証済みユーザーを取得
+            $user = \Auth::user();
+            
+            //Mealモデルをインスタンス化後、dateカラムで降順にして、表示件数を絞る
+            //paginateを設定したので、 index.blade.phpにベージネーションのリンクをつける。
+            //$meals = Meal::orderBy('date', 'desc')->paginate(5);
+            
+            $meals = $user->meals()->orderBy('created_at', 'desc')->paginate(5);
+            
+            $data = [
+                'user' => $user,
+                'meals' => $meals,
+            ];
+        }
         
-        //Mealモデルをインスタンス化後、dateカラムで降順にして、表示件数を絞る
-        //paginateを設定したので、 index.blade.phpにベージネーションのリンクをつける。
-        $meals = Meal::orderBy('date', 'desc')->paginate(5);
         //'meeals'はビューファイル側で呼び出す変数名
         //$mealsはコントローラ内で生成した変数($meals = Meal::all();)
-        return view('meals.index', [ 'meals' => $meals, ]);
+        return view('welcome', $data);
     }
 
     /**
@@ -35,12 +48,19 @@ class MealsController extends Controller
      */
     public function create()
     {
+        
+        // 認証済みの場合
+        if (\Auth::check()) {
+        
         //Mealモデルをインスタンス化し、値を $meal に代入
         $meals = new Meal;
         
         //'meals'はビューファイル側で呼び出す変数名
         //$mealsはコントローラ内で生成した変数
         return view ('meals.create', ['meals' => $meals, ]);
+        }
+        //トップぺージへリダイレクトされる
+        return redirect("/");
     }
 
     /**
@@ -53,27 +73,38 @@ class MealsController extends Controller
     {
         //バリデーション
         $request->validate([
-            'date' => 'required',
-            'user_id' => 'required',
-            'kind' => 'required',
-            'content' => 'required',
-            'calorie' =>'required',
+            'date' => ['required', 'date', 'max:255'],
+            //'user_id' => ['required', 'max:255'],
+            'kind' => ['required','string', 'max:255'],
+            'content' => [ 'required','string', 'max:255'],
+            'calorie' => ['required','integer'],// !!データ型エラーを日本語化する!!
         ]);
         
         
-        
+        /*
         //リストを作成
         $meal = new Meal;//レコードを新規追加
         
         //create.blade.phpで受け取った値をインスタンス化したMealモデル($meal)へレコード内のカラムへ入れる。
         $meal->date = $request->date;
-        $meal->user_id = $request->user_id;
+        //$meal->user_id = $request->user_id;
         $meal->kind = $request->kind;
         $meal->content = $request->content;
         $meal->calorie = $request->calorie;
         
         //カラムへ保存
         $meal ->save();
+        */
+        
+        //これにより、user_idを手入力しなくてもログインユーザーのuser_idがレコードに入る
+        $request->user()->meals()->create([
+            
+            //レコードを作成
+            'date' => $request->date,
+            'kind'=> $request->kind,
+            'content'=> $request->content,
+            'calorie'=> $request->calorie,
+        ]);
         
         //トップページへリダイレクト
         return redirect('/');
@@ -107,12 +138,16 @@ class MealsController extends Controller
     public function edit($id)
     {
 
-        //詳細のレコードは1件である為、ここでは単数形($meal)としている
-        $meal = Meal::findOrFail($id);
-        
-        return view('meals.edit', ['meal' => $meal,]);
+        $meal =  \App\Meal::findOrFail($id);
+        if (\Auth::id() === $meal->user_id) {
+            //詳細のレコードは1件である為、ここでは単数形($meal)としている
+            $meal = Meal::findOrFail($id);
+            
+            return view('meals.edit', ['meal' => $meal,]);
+        }
+        //トップぺージへリダイレクトされる
+        return redirect("/");
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -124,11 +159,11 @@ class MealsController extends Controller
     {
         //バリデーション
         $request->validate([
-            'date' => 'required',
-            'user_id' => 'required',
-            'kind' => 'required',
-            'content' => 'required',
-            'calorie' =>'required',
+            'date' => ['required', 'date', 'max:255'],
+            //'user_id' => ['required', 'max:255'],
+            'kind' => ['required','string', 'max:255'],
+            'content' => [ 'required','string', 'max:255'],
+            'calorie' => ['required','integer'],// !!データ型エラーを日本語化する!!
         ]);
 
 
@@ -160,8 +195,13 @@ class MealsController extends Controller
         //idの値でレコードを検索して取得
         $meal = Meal::findOrFail($id);
         
-        //レコード削除
-        $meal->delete(); 
+         // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を削除
+        if (\Auth::id() === $meal->user_id) {
+        
+            //レコード削除
+            $meal->delete(); 
+            
+        }
         
         //トップページへリダイレクトさせる
         return redirect('/');

@@ -30,7 +30,7 @@ class CreateMealsTable extends Migration
             //業務ではモデルの中で設定している。(SQLの時点でガチガチに設定したくない為)
             
             //$table->foreign(外部キー制約を設定するカラム名)->references(参照されるカラム名)-ｓｓ>on(参照されるテーブル名);
-            //$table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
             
         });
     }

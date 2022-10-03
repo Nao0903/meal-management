@@ -38,6 +38,7 @@ class User extends Authenticatable
     ];
     
     
+    //MealsControllerで $user->meals() のように使用して、ログイン中ユーザーの操作とすることができる。
     public function meals()
     {
         return $this->hasMany(Meal::class);

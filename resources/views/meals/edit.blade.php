@@ -22,8 +22,10 @@
                     {!! Form::label('date', '日付:') !!}
                     {!! Form::date('date', null, ['class' => 'form-control']) !!}
                     
-                    {!! Form::label('user_id', 'ユーザID(動作確認用、本番は外部キー制約をつけて、この項目を消す):') !!}
-                    {!! Form::text('user_id', null, ['class' => 'form-control']) !!}
+                    {{--
+                        {!! Form::label('user_id', 'ユーザID(動作確認用、本番は外部キー制約をつけて、この項目を消す):') !!}
+                        {!! Form::text('user_id', null, ['class' => 'form-control']) !!}
+                    --}}
                     
                     {!! Form::label('kind', '種類:') !!}
                     {!! Form::text('kind', null, ['class' => 'form-control']) !!}

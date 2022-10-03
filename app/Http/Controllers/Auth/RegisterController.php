@@ -21,7 +21,8 @@ class RegisterController extends Controller
     | provide this functionality without requiring any additional code.
     |
     */
-
+    
+    //このトレイと内にRegisterメソッドが定義されている
     use RegistersUsers;
 
     /**
