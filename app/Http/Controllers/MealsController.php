@@ -172,7 +172,7 @@ class MealsController extends Controller
         
         //Mealモデルで検索したレコード($meal)へ edit.blade.phpで受け取った値をカラムへ入れる
         $meal->date = $request->date;
-        $meal->user_id = $request->user_id;
+        //$meal->user_id = $request->user_id;
         $meal->kind = $request->kind;
         $meal->content = $request->content;
         $meal->calorie = $request->calorie;
